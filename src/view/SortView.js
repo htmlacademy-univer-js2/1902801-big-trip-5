@@ -1,4 +1,4 @@
-import { createElement } from "../render";
+import { createElement } from '../render';
 
 export default class SortView {
   getTemplate() {
@@ -31,7 +31,9 @@ export default class SortView {
   }
 
   getElement() {
-    if (!this.element) this.element = createElement(this.getTemplate());
+    if (!this.element) {
+      this.element = createElement(this.getTemplate());
+    }
     return this.element;
   }
 
