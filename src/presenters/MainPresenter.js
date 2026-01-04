@@ -1,6 +1,6 @@
 import SortView from '../view/SortView';
 import EditPointView from '../view/EditPointView';
-import { render, RenderPosition } from '../render';
+import { render, RenderPosition, replace } from '../framework/render';
 import FilterView from '../view/FilterView';
 import AddPointView from '../view/AddPointView';
 import PointView from '../view/PointView';
@@ -22,33 +22,8 @@ export default class MainPresenter {
     render(
       new SortView(),
       document.querySelector('.trip-events'),
-      RenderPosition.BEFOREEND
+      RenderPosition.AFTERBEGIN
     );
-  }
-
-  renderEditForm() {
-    const tripEventsList = document.querySelector('.trip-events__list');
-    const points = this.model.getPoints();
-
-    if (points.length > 0) {
-      const point = points[0];
-      const destination = this.model.getDestinationById(point.destination);
-      const availableOffers = this.model.getOffersByType(point.type);
-      const selectedOffersIds = point.offers || [];
-      const allDestinations = this.model.getAllDestinations();
-
-      const editPointView = new EditPointView(
-        point,
-        destination,
-        availableOffers,
-        selectedOffersIds,
-        allDestinations
-      );
-      const listItem = document.createElement('li');
-      listItem.className = 'trip-events__item';
-      listItem.appendChild(editPointView.getElement());
-      tripEventsList.insertBefore(listItem, tripEventsList.firstChild);
-    }
   }
 
   renderPointsList() {
@@ -64,8 +39,42 @@ export default class MainPresenter {
       const pointView = new PointView(point, destination, selectedOffers);
       const listItem = document.createElement('li');
       listItem.className = 'trip-events__item';
-      listItem.appendChild(pointView.getElement());
+      listItem.appendChild(pointView.element);
       tripEventsList.appendChild(listItem);
+
+      const availableOffers = this.model.getOffersByType(point.type);
+      const selectedOffersIds = point.offers || [];
+      const allDestinations = this.model.getAllDestinations();
+      const editPointView = new EditPointView(
+        point,
+        destination,
+        availableOffers,
+        selectedOffersIds,
+        allDestinations
+      );
+
+      const onEscKeyDown = (evt) => {
+        if (evt.key === 'Escape' || evt.key === 'Esc') {
+          evt.preventDefault();
+          replace(pointView, editPointView);
+          document.removeEventListener('keydown', onEscKeyDown);
+        }
+      };
+
+      pointView.setRollupHandler(() => {
+        replace(editPointView, pointView);
+        document.addEventListener('keydown', onEscKeyDown);
+      });
+
+      editPointView.setSubmitHandler(() => {
+        replace(pointView, editPointView);
+        document.removeEventListener('keydown', onEscKeyDown);
+      });
+
+      editPointView.setRollupHandler(() => {
+        replace(pointView, editPointView);
+        document.removeEventListener('keydown', onEscKeyDown);
+      });
     });
   }
 
@@ -79,7 +88,7 @@ export default class MainPresenter {
     );
     const listItem = document.createElement('li');
     listItem.className = 'trip-events__item';
-    listItem.appendChild(createPointView.getElement());
+    listItem.appendChild(createPointView.element);
     eventsList.appendChild(listItem);
   }
 
@@ -87,7 +96,6 @@ export default class MainPresenter {
     this.renderFilters();
     this.renderSort();
     this.renderPointsList();
-    this.renderEditForm();
     this.renderAddPoint();
   }
 }

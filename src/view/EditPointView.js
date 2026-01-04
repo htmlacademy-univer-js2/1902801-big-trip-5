@@ -1,6 +1,6 @@
 import { parseFormatDateForInput } from '../utils/date-time';
 import { POINT_TYPE_LIST } from '../mock-data';
-import AbstractView from './AbstractView';
+import AbstractView from '../framework/view/abstract-view.js';
 
 export default class EditPointView extends AbstractView {
   constructor(
@@ -180,5 +180,18 @@ export default class EditPointView extends AbstractView {
         }
       </form>
     `;
+  }
+
+  setSubmitHandler(handler) {
+    this.element.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handler();
+    });
+  }
+
+  setRollupHandler(handler) {
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', handler);
   }
 }
