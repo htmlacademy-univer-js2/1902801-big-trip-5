@@ -1,32 +1,47 @@
-import dayjs from 'dayjs';
+const MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 
 export function parseFormatDate(dateString) {
-  return dayjs(dateString).format('MMM D').toUpperCase();
+  const dateObj = new Date(dateString);
+  const month = MONTHS[dateObj.getMonth()];
+  const day = dateObj.getDate();
+  return `${month} ${day}`;
 }
 
 export function parseFormatTime(dateString) {
-  return dayjs(dateString).format('HH:mm');
+  const dateObj = new Date(dateString);
+  const hours = dateObj.getHours().toString().padStart(2, '0');
+  const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 export function parseFormatDateForInput(dateString) {
-  return dayjs(dateString).format('DD/MM/YY HH:mm');
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString().slice(-2);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
 export function calculateDuration(dateFromString, dateToString) {
-  const from = dayjs(dateFromString);
-  const to = dayjs(dateToString);
-  const diffMins = Math.max(0, to.diff(from, 'minute'));
-
-  if (diffMins < 60) {
-    return `${diffMins}M`;
-  }
-
-  const hours = Math.floor(diffMins / 60);
-  const minutes = diffMins % 60;
-
-  if (minutes === 0) {
-    return `${hours}H`;
-  }
-
+  const fromDate = new Date(dateFromString);
+  const toDate = new Date(dateToString);
+  const duration = toDate.getTime() - fromDate.getTime();
+  const hours = Math.floor(duration / (1000 * 60 * 60));
+  const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
   return `${hours}H ${minutes}M`;
 }
