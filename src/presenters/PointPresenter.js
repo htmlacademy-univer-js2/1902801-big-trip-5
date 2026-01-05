@@ -1,4 +1,4 @@
-import { replace, render } from '../framework/render';
+import { replace, render, remove } from '../framework/render';
 import PointView from '../view/PointView';
 import EditPointView from '../view/EditPointView';
 
@@ -36,6 +36,16 @@ export default class PointPresenter {
     if (this.mode !== Mode.DEFAULT) {
       this.#replacePoint();
     }
+  }
+
+  remove() {
+    if (this.pointView) {
+      remove(this.pointView);
+    }
+    if (this.editPointView) {
+      remove(this.editPointView);
+    }
+    document.removeEventListener('keydown', this.#handleEscKeyDown);
   }
 
   #replaceEdit() {

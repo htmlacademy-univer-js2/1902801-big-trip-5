@@ -5,11 +5,13 @@ import AddPointView from '../view/AddPointView';
 import EmptyPointsListView from '../view/EmptyPointsListView';
 import PointPresenter from './PointPresenter';
 import PointView from '../view/PointView';
+import { SortType } from '../view/SortView';
 
 export default class MainPresenter {
   constructor(model) {
     this.model = model;
     this.pointPresenters = [];
+    this.currentSortType = SortType.DAY;
   }
 
   renderFilters() {
@@ -35,11 +37,52 @@ export default class MainPresenter {
   }
 
   renderSort() {
+    this.sortView = new SortView(this.currentSortType);
+    this.sortView.setSortTypeChangeHandler((sortType) =>
+      this.handleSortTypeChange(sortType)
+    );
     render(
-      new SortView(),
+      this.sortView,
       document.querySelector('.trip-events'),
       RenderPosition.AFTERBEGIN
     );
+  }
+
+  handleSortTypeChange(sortType) {
+    if (this.currentSortType === sortType) {
+      return;
+    }
+    this.currentSortType = sortType;
+    this.clearPoints();
+    this.renderPointsList();
+  }
+
+  getSortedPoints() {
+    const points = this.model.getPoints().slice(0, 3);
+
+    if (this.currentSortType === SortType.TIME) {
+      return points.sort(
+        (a, b) =>
+          new Date(b.date_to) -
+          new Date(b.date_from) -
+          (new Date(a.date_to) - new Date(a.date_from))
+      );
+    }
+
+    if (this.currentSortType === SortType.PRICE) {
+      return points.sort((a, b) => b.base_price - a.base_price);
+    }
+
+    return points.sort((a, b) => new Date(a.date_from) - new Date(b.date_from));
+  }
+
+  clearPoints() {
+    this.pointPresenters.forEach((p) => p.remove());
+    this.pointPresenters = [];
+    const eventsList = document.querySelector('.trip-events__list');
+    if (eventsList) {
+      eventsList.innerHTML = '';
+    }
   }
 
   renderPointsList() {
@@ -54,7 +97,7 @@ export default class MainPresenter {
       return;
     }
 
-    const pointsToRender = points.slice(0, 3);
+    const pointsToRender = this.getSortedPoints();
 
     this.pointPresenters = pointsToRender.map((point) => {
       const destination = this.model.getDestinationById(point.destination);

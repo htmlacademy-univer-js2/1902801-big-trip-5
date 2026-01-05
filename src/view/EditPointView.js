@@ -22,12 +22,12 @@ export default class EditPointView extends AbstractView {
     const pointType = this.point?.type || 'flight';
     const destinationName = this.destination?.name || '';
     const startTime = this.point
-      ? parseFormatDateForInput(this.point.dateFrom)
+      ? parseFormatDateForInput(this.point.date_from)
       : '';
     const endTime = this.point
-      ? parseFormatDateForInput(this.point.dateTo)
+      ? parseFormatDateForInput(this.point.date_to)
       : '';
-    const price = this.point?.basePrice || '';
+    const price = this.point?.base_price || '';
     const description = this.destination?.description || '';
     const pictures = this.destination?.pictures || [];
 
